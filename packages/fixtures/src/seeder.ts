@@ -1,6 +1,7 @@
+import { randomUUID } from 'node:crypto';
 import { and, eq } from 'drizzle-orm';
 import type { Database } from '@magic/db';
-import { schema, withTenant, withoutTenant } from '@magic/db';
+import { schema, withTenant } from '@magic/db';
 import { executeRun, recomputeSettlement, runMatching } from '@magic/recon';
 import { hashPassword } from '@magic/security';
 import { FIXTURE_NOW } from './clock.js';
@@ -29,18 +30,15 @@ export const SEED_PASSWORD = 'magic-dev-password';
  * no credential, real or fake, that could be mistaken for one.
  */
 export async function seedTenant(db: Database, options: SeedTenantOptions): Promise<SeededTenant> {
-  return withoutTenant(db, async (tx) => {
-    const [tenant] = await tx
-      .insert(schema.tenants)
-      .values({
-        slug: options.slug,
-        displayName: options.displayName,
-        timezone: options.timezone ?? 'UTC',
-      })
-      .returning({ id: schema.tenants.id });
+  const tenantId = randomUUID();
 
-    const tenantId = tenant?.id;
-    if (!tenantId) throw new Error('Failed to create the fixture tenant.');
+  return withTenant(db, { tenantId }, async (tx) => {
+    await tx.insert(schema.tenants).values({
+      id: tenantId,
+      slug: options.slug,
+      displayName: options.displayName,
+      timezone: options.timezone ?? 'UTC',
+    });
 
     const webhookPathKey = `whk_${options.slug.replace(/[^a-z0-9]/g, '')}_${tenantId.slice(0, 8)}`;
 
@@ -103,7 +101,7 @@ export interface SeedUserSpec {
 }
 
 export async function seedUsers(db: Database, tenantId: string, users: readonly SeedUserSpec[]): Promise<void> {
-  await withoutTenant(db, async (tx) => {
+  await withTenant(db, { tenantId }, async (tx) => {
     for (const spec of users) {
       const [existing] = await tx
         .select({ id: schema.users.id })
