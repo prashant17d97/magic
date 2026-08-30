@@ -1,0 +1,210 @@
+/*
+ * MAGIC design tokens.
+ *
+ * Two decisions here are load-bearing and easy to undo by accident:
+ *
+ * 1. In light mode the page is tinted (neutral-50) and cards are white. In a dense table product
+ *    that inversion makes the table read as an elevated working surface instead of dissolving
+ *    into the page.
+ * 2. Brand-500 is a fill and a focus ring, never body text in light mode. It measures 3.13:1 on
+ *    white, which fails AA for text. Brand-700 is the minimum for text; brand-800 for links.
+ */
+
+:root {
+  --brand-50:  #E3F2FD;
+  --brand-100: #BBDEFB;
+  --brand-200: #90CAF9;
+  --brand-300: #64B5F6;
+  --brand-400: #42A5F5;
+  --brand-500: #2196F3;
+  --brand-600: #1E88E5;
+  --brand-700: #1976D2;
+  --brand-800: #1565C0;
+  --brand-900: #0D47A1;
+
+  --neutral-0:   #FFFFFF;
+  --neutral-25:  #FAFBFD;
+  --neutral-50:  #F4F6FA;
+  --neutral-100: #E9EDF4;
+  --neutral-200: #D7DEE9;
+  --neutral-300: #B6C0D0;
+  --neutral-400: #8592A8;
+  --neutral-500: #64748B;
+  --neutral-600: #4A5568;
+  --neutral-700: #344055;
+  --neutral-800: #1E2739;
+  --neutral-900: #0F172A;
+  --neutral-950: #080B12;
+
+  --bg-base:     var(--neutral-50);
+  --bg-surface:  var(--neutral-0);
+  --bg-raised:   var(--neutral-0);
+  --bg-overlay:  var(--neutral-0);
+  --bg-sunken:   var(--neutral-100);
+  --bg-selected: var(--brand-50);
+  --bg-hover:    var(--neutral-50);
+  --scrim:       rgba(15, 23, 42, 0.45);
+
+  --text-primary:   var(--neutral-900);
+  --text-secondary: var(--neutral-600);
+  --text-tertiary:  var(--neutral-400);
+  --text-disabled:  var(--neutral-300);
+  --text-inverse:   var(--neutral-0);
+  --text-brand:     var(--brand-800);
+  --text-link:      var(--brand-800);
+
+  --border-subtle:  var(--neutral-100);
+  --border-default: var(--neutral-200);
+  --border-strong:  var(--neutral-400);
+  --border-brand:   var(--brand-500);
+  --border-focus:   var(--brand-500);
+
+  --brand-fill:        var(--brand-500);
+  --brand-fill-hover:  var(--brand-600);
+  --brand-fill-active: var(--brand-700);
+  --brand-on-fill:     var(--neutral-0);
+
+  --success-fg: #067A55;  --success-bg: #E6F5F0;  --success-border: #A8DCC8;
+  --warning-fg: #A15C07;  --warning-bg: #FDF4E3;  --warning-border: #EBCE94;
+  --danger-fg:  #C0271F;  --danger-bg:  #FCEDEB;  --danger-border:  #F0B3AD;
+  --info-fg:    var(--brand-800); --info-bg: var(--brand-50); --info-border: var(--brand-200);
+  --muted-fg:   var(--neutral-500); --muted-bg: var(--neutral-50); --muted-border: var(--neutral-200);
+  /* The brand tone reads a step stronger than `info`, which is what separates an admin badge
+     from a member one. Both themes define it, so nothing reaches into the fixed palette ramp. */
+  --brand-tone-fg: var(--brand-900); --brand-tone-bg: var(--brand-100); --brand-tone-border: var(--brand-300);
+
+  /* A solid danger chip. `--danger-fg` is a foreground: it darkens in light mode and lightens in
+     dark, so using it as a fill needs a paired on-fill rather than an assumed white. */
+  --danger-fill: #C0271F; --danger-on-fill: var(--neutral-0);
+
+  --shadow-xs: 0 1px 2px rgba(15,23,42,.06);
+  --shadow-sm: 0 1px 3px rgba(15,23,42,.08), 0 1px 2px rgba(15,23,42,.04);
+  --shadow-md: 0 4px 8px rgba(15,23,42,.08), 0 2px 4px rgba(15,23,42,.04);
+  --shadow-lg: 0 12px 24px rgba(15,23,42,.10), 0 4px 8px rgba(15,23,42,.04);
+
+  --space-1: 4px;   --space-2: 8px;   --space-3: 12px;  --space-4: 16px;
+  --space-5: 20px;  --space-6: 24px;  --space-8: 32px;  --space-12: 48px;
+  --space-16: 64px;
+
+  --radius-xs: 2px; --radius-sm: 4px; --radius-md: 6px; --radius-lg: 8px;
+  --radius-full: 9999px;
+
+  --duration-instant: 100ms;
+  --duration-fast:    150ms;
+  --duration-base:    200ms;
+  --duration-slow:    300ms;
+
+  --ease-out:   cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in:    cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-inout: cubic-bezier(0.65, 0, 0.35, 1);
+
+  --row-height: 40px;
+  --cell-pad-y: 8px;
+  --table-font-size: 13px;
+
+  --sidebar-width: 240px;
+  --sidebar-width-collapsed: 56px;
+  --drawer-width: 640px;
+
+  --z-sticky: 100;
+  --z-drawer: 300;
+  --z-modal: 400;
+  --z-popover: 500;
+  --z-toast: 600;
+}
+
+/*
+ * Dark is designed, not inverted. Operators live in this tool for hours, so the base is never
+ * pure black and the text is never pure white — both produce halation on an OLED panel.
+ */
+[data-theme='dark'] {
+  --bg-base:     #080B12;
+  --bg-surface:  #10151F;
+  --bg-raised:   #171D2A;
+  --bg-overlay:  #1E2534;
+  --bg-sunken:   #05070C;
+  --bg-selected: #0F2740;
+  --bg-hover:    #171D2A;
+  --scrim:       rgba(0, 0, 0, 0.65);
+
+  --text-primary:   #E8EDF5;
+  --text-secondary: #97A3B6;
+  --text-tertiary:  #5D6979;
+  --text-disabled:  #3B4453;
+  --text-inverse:   #080B12;
+  --text-brand:     var(--brand-300);
+  --text-link:      var(--brand-300);
+
+  --border-subtle:  #171D2A;
+  --border-default: #262E3F;
+  --border-strong:  #414B60;
+  --border-brand:   var(--brand-500);
+  --border-focus:   var(--brand-300);
+
+  --brand-fill:        var(--brand-500);
+  --brand-fill-hover:  var(--brand-400);
+  --brand-fill-active: var(--brand-600);
+  --brand-on-fill:     #06121F;
+
+  --success-fg: #3DD9A4;  --success-bg: #06251C;  --success-border: #12503C;
+  --warning-fg: #F5B544;  --warning-bg: #2A1D06;  --warning-border: #5C4310;
+  --danger-fg:  #FF7A6E;  --danger-bg:  #2C0F0C;  --danger-border:  #63241E;
+  --info-fg:    var(--brand-300); --info-bg: #0B1A2E; --info-border: #1B3D63;
+  --muted-fg:   var(--neutral-400); --muted-bg: #10151F; --muted-border: #262E3F;
+  --brand-tone-fg: var(--brand-200); --brand-tone-bg: #10294A; --brand-tone-border: #2C5F96;
+  --danger-fill: #FF7A6E; --danger-on-fill: #2C0F0C;
+
+  /* Depth comes from the luminance step; shadow only anchors a floating layer. */
+  --shadow-xs: 0 1px 2px rgba(0,0,0,.4);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.5);
+  --shadow-md: 0 4px 12px rgba(0,0,0,.55);
+  --shadow-lg: 0 16px 32px rgba(0,0,0,.6);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg-base:     #080B12;
+    --bg-surface:  #10151F;
+    --bg-raised:   #171D2A;
+    --bg-overlay:  #1E2534;
+    --bg-sunken:   #05070C;
+    --bg-selected: #0F2740;
+    --bg-hover:    #171D2A;
+    --scrim:       rgba(0, 0, 0, 0.65);
+
+    --text-primary:   #E8EDF5;
+    --text-secondary: #97A3B6;
+    --text-tertiary:  #5D6979;
+    --text-disabled:  #3B4453;
+    --text-inverse:   #080B12;
+    --text-brand:     var(--brand-300);
+    --text-link:      var(--brand-300);
+
+    --border-subtle:  #171D2A;
+    --border-default: #262E3F;
+    --border-strong:  #414B60;
+    --border-focus:   var(--brand-300);
+
+    --brand-fill-hover:  var(--brand-400);
+    --brand-fill-active: var(--brand-600);
+    --brand-on-fill:     #06121F;
+
+    --success-fg: #3DD9A4;  --success-bg: #06251C;  --success-border: #12503C;
+    --warning-fg: #F5B544;  --warning-bg: #2A1D06;  --warning-border: #5C4310;
+    --danger-fg:  #FF7A6E;  --danger-bg:  #2C0F0C;  --danger-border:  #63241E;
+    --info-fg:    var(--brand-300); --info-bg: #0B1A2E; --info-border: #1B3D63;
+    --muted-fg:   var(--neutral-400); --muted-bg: #10151F; --muted-border: #262E3F;
+    --brand-tone-fg: var(--brand-200); --brand-tone-bg: #10294A; --brand-tone-border: #2C5F96;
+    --danger-fill: #FF7A6E; --danger-on-fill: #2C0F0C;
+
+    --shadow-xs: 0 1px 2px rgba(0,0,0,.4);
+    --shadow-sm: 0 1px 3px rgba(0,0,0,.5);
+    --shadow-md: 0 4px 12px rgba(0,0,0,.55);
+    --shadow-lg: 0 16px 32px rgba(0,0,0,.6);
+  }
+}
+
+/* Density is a user preference because operators genuinely differ, and forcing one is a fight. */
+[data-density='compact'] { --row-height: 32px; --cell-pad-y: 4px; --table-font-size: 13px; }
+[data-density='default'] { --row-height: 40px; --cell-pad-y: 8px; --table-font-size: 13px; }
+[data-density='comfortable'] { --row-height: 48px; --cell-pad-y: 12px; --table-font-size: 14px; }

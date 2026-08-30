@@ -1,0 +1,212 @@
+@import 'tailwindcss';
+@import './tokens.css';
+
+/*
+ * Tokens are exposed to Tailwind so a utility and a hand-written rule can never disagree about
+ * what `--bg-surface` means. Anything not listed here is deliberately not a utility: the design
+ * system is the vocabulary, not an open palette.
+ */
+@theme inline {
+  --color-base: var(--bg-base);
+  --color-surface: var(--bg-surface);
+  --color-raised: var(--bg-raised);
+  --color-overlay: var(--bg-overlay);
+  --color-sunken: var(--bg-sunken);
+  --color-selected: var(--bg-selected);
+  --color-hover: var(--bg-hover);
+
+  --color-primary: var(--text-primary);
+  --color-secondary: var(--text-secondary);
+  --color-tertiary: var(--text-tertiary);
+  --color-brand: var(--text-brand);
+  --color-inverse: var(--text-inverse);
+
+  --color-subtle: var(--border-subtle);
+  --color-default: var(--border-default);
+  --color-strong: var(--border-strong);
+  --color-focus: var(--border-focus);
+
+  --color-fill: var(--brand-fill);
+  --color-fill-hover: var(--brand-fill-hover);
+  --color-on-fill: var(--brand-on-fill);
+
+  --color-success: var(--success-fg);
+  --color-success-bg: var(--success-bg);
+  --color-warning: var(--warning-fg);
+  --color-warning-bg: var(--warning-bg);
+  --color-danger: var(--danger-fg);
+  --color-danger-bg: var(--danger-bg);
+  --color-info: var(--info-fg);
+  --color-info-bg: var(--info-bg);
+  --color-muted: var(--muted-fg);
+  --color-muted-bg: var(--muted-bg);
+
+  --radius-xs: var(--radius-xs);
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+
+  --font-display: var(--font-sora), system-ui, sans-serif;
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+
+  --shadow-xs: var(--shadow-xs);
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+}
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  /**
+   * The document never scrolls. Every full-height route owns its own scroll container, which is
+   * what keeps a long table scrolling inside its region instead of dragging the whole shell —
+   * sidebar, header and all — up off the screen and leaving dead space below it.
+   */
+  html,
+  body {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  html {
+    color-scheme: light dark;
+  }
+
+  body {
+    margin: 0;
+    background: var(--bg-base);
+    color: var(--text-primary);
+    font-family: var(--font-inter), system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 20px;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /*
+   * Misaligned decimal points down a column of amounts is the first detail a finance user
+   * notices and the last one they forgive, so tabular figures are not optional here.
+   */
+  .numeric,
+  td.numeric,
+  th.numeric,
+  .kpi-value {
+    font-variant-numeric: tabular-nums lining-nums;
+    font-feature-settings: 'tnum' 1, 'lnum' 1;
+    font-variant-ligatures: none;
+    text-align: right;
+  }
+
+  ::selection {
+    background: var(--bg-selected);
+    color: var(--text-primary);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--border-focus);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+
+  input,
+  button,
+  select,
+  textarea {
+    font: inherit;
+    color: inherit;
+  }
+
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: var(--border-default);
+    border-radius: var(--radius-full);
+    border: 2px solid var(--bg-base);
+  }
+  ::-webkit-scrollbar-thumb:hover { background: var(--border-strong); }
+}
+
+@layer components {
+  .type-display { font-family: var(--font-sora), system-ui, sans-serif; font-size: 32px; line-height: 40px; font-weight: 700; }
+  .type-h1 { font-family: var(--font-sora), system-ui, sans-serif; font-size: 24px; line-height: 32px; font-weight: 600; letter-spacing: -0.01em; }
+  .type-h2 { font-family: var(--font-sora), system-ui, sans-serif; font-size: 20px; line-height: 28px; font-weight: 600; }
+  .type-h3 { font-family: var(--font-sora), system-ui, sans-serif; font-size: 16px; line-height: 24px; font-weight: 600; }
+  .type-kpi { font-family: var(--font-sora), system-ui, sans-serif; font-size: 28px; line-height: 34px; font-weight: 600; font-variant-numeric: tabular-nums lining-nums; }
+  .type-body { font-size: 14px; line-height: 20px; }
+  .type-body-sm { font-size: 13px; line-height: 18px; }
+  .type-table { font-size: var(--table-font-size); line-height: 18px; }
+  .type-table-head { font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: 0.02em; }
+  .type-caption { font-size: 12px; line-height: 16px; }
+  .type-label { font-size: 11px; line-height: 14px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
+  .type-mono { font-family: var(--font-jetbrains), ui-monospace, monospace; font-size: 12px; line-height: 16px; }
+  .type-mono-sm { font-family: var(--font-jetbrains), ui-monospace, monospace; font-size: 11px; line-height: 15px; }
+
+  .surface {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-xs);
+  }
+
+  /*
+   * The ledger strip. A reconciliation result is an accounting subtotal, so it is set like one:
+   * aligned figures, a hairline rule above the total, and the delta given the most weight on the
+   * page. A balanced run should read as a receipt rather than as an absence of errors.
+   */
+  .ledger-strip {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: var(--space-2) var(--space-6);
+    font-variant-numeric: tabular-nums lining-nums;
+  }
+
+  .ledger-strip dt { color: var(--text-secondary); font-size: 13px; }
+  .ledger-strip dd { margin: 0; text-align: right; font-size: 13px; }
+
+  /*
+   * The subtotal rule sits over the figure, not across the label, which is how a ledger is
+   * actually ruled. Running it the full width of the row would read as a section divider.
+   */
+  .ledger-strip .ledger-total {
+    padding-top: var(--space-2);
+    margin-top: var(--space-1);
+    font-weight: 600;
+  }
+
+  .ledger-strip dd.ledger-total {
+    border-top: 1px solid var(--border-strong);
+  }
+
+  .skeleton {
+    background: linear-gradient(90deg, var(--bg-sunken) 25%, var(--bg-hover) 50%, var(--bg-sunken) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+    border-radius: var(--radius-sm);
+  }
+
+  @keyframes shimmer {
+    from { background-position: 200% 0; }
+    to { background-position: -200% 0; }
+  }
+}
+
+/*
+ * No spring physics anywhere. Springs read as playful, and playful is the wrong register for a
+ * tool people open when money is missing.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

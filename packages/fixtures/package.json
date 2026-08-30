@@ -1,0 +1,33 @@
+{
+  "name": "@magic/fixtures",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "seed": "tsx --env-file-if-exists=../../.env src/cli/seed.ts",
+    "test": "vitest run",
+    "test:determinism": "vitest run src/determinism.test.ts",
+    "test:chaos": "vitest run src/chaos.test.ts"
+  },
+  "dependencies": {
+    "@magic/db": "workspace:*",
+    "@magic/recon": "workspace:*",
+    "drizzle-orm": "^0.45.2",
+    "@magic/security": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "tsx": "^4.20.6",
+    "vitest": "^3.2.4"
+  }
+}

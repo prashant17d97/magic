@@ -1,0 +1,157 @@
+name: magic
+
+# The full stack as it is actually deployed: four services from one image, sharing one Postgres
+# and one Redis. `ingest` is a separate service on purpose — a webhook flood must never delay the
+# console, and a console traffic spike must never delay a webhook acknowledgement.
+
+x-service-env: &service-env
+  NODE_ENV: production
+  DATABASE_URL: postgres://magic_app:${POSTGRES_APP_PASSWORD:-magic_app_password}@postgres:5432/magic
+  DATABASE_URL_OWNER: postgres://magic_owner:${POSTGRES_PASSWORD:-magic_owner_password}@postgres:5432/magic
+  MAGIC_APP_PASSWORD: ${POSTGRES_APP_PASSWORD:-magic_app_password}
+  REDIS_URL: redis://redis:6379
+  SERVICE_TOKEN: ${SERVICE_TOKEN:?SERVICE_TOKEN must be set}
+  SESSION_SECRET: ${SESSION_SECRET:?SESSION_SECRET must be set}
+  STRIPE_API_VERSION: ${STRIPE_API_VERSION:-2026-06-30}
+  SECRETS_PROVIDER: ${SECRETS_PROVIDER:-env}
+  STRIPE_PLATFORM_API_KEY: ${STRIPE_PLATFORM_API_KEY:-}
+  STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+  EXPORT_DIR: /var/magic/exports
+  LOG_LEVEL: ${LOG_LEVEL:-info}
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: magic_owner
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-magic_owner_password}
+      POSTGRES_DB: magic
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U magic_owner -d magic']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ['redis-server', '--appendonly', 'yes', '--maxmemory-policy', 'noeviction']
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  # Migrations run as the schema owner and to completion before anything else starts. The
+  # application role must not own these tables, because a table owner bypasses row-level security.
+  migrate:
+    build: { context: .., dockerfile: infra/Dockerfile }
+    environment: *service-env
+    command: ['node', 'packages/db/dist/cli/migrate.js']
+    depends_on:
+      postgres: { condition: service_healthy }
+    restart: 'no'
+
+  api:
+    build: { context: .., dockerfile: infra/Dockerfile }
+    restart: unless-stopped
+    environment:
+      <<: *service-env
+      API_PORT: 4000
+    command: ['node', 'apps/api/dist/main.js']
+    expose: ['4000']
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+      redis: { condition: service_healthy }
+    volumes:
+      - exports:/var/magic/exports
+    healthcheck:
+      test: ['CMD', 'node', '-e', "fetch('http://localhost:4000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  ingest:
+    build: { context: .., dockerfile: infra/Dockerfile }
+    restart: unless-stopped
+    environment:
+      <<: *service-env
+      INGEST_PORT: 4001
+    command: ['node', 'apps/ingest/dist/main.js']
+    ports: ['4001:4001']
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+    healthcheck:
+      test: ['CMD', 'node', '-e', "fetch('http://localhost:4001/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  worker-ingest:
+    build: { context: .., dockerfile: infra/Dockerfile }
+    restart: unless-stopped
+    environment:
+      <<: *service-env
+      WORKER_ROLE: ingest
+      WORKER_METRICS_PORT: 4002
+    command: ['node', 'apps/worker/dist/main.js']
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+      redis: { condition: service_healthy }
+
+  worker-recon:
+    build: { context: .., dockerfile: infra/Dockerfile }
+    restart: unless-stopped
+    environment:
+      <<: *service-env
+      WORKER_ROLE: recon
+      WORKER_METRICS_PORT: 4002
+    command: ['node', 'apps/worker/dist/main.js']
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+      redis: { condition: service_healthy }
+
+  worker-ops:
+    build: { context: .., dockerfile: infra/Dockerfile }
+    restart: unless-stopped
+    environment:
+      <<: *service-env
+      WORKER_ROLE: ops
+      WORKER_METRICS_PORT: 4002
+    command: ['node', 'apps/worker/dist/main.js']
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+      redis: { condition: service_healthy }
+    volumes:
+      - exports:/var/magic/exports
+
+  web:
+    build: { context: .., dockerfile: infra/Dockerfile }
+    restart: unless-stopped
+    command: ['node', 'web/apps/web/server.js']
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      API_INTERNAL_URL: http://api:4000
+      SERVICE_TOKEN: ${SERVICE_TOKEN:?SERVICE_TOKEN must be set}
+      SESSION_SECRET: ${SESSION_SECRET:?SESSION_SECRET must be set}
+      REDIS_URL: redis://redis:6379
+      EXPORT_DIR: /var/magic/exports
+      # The `exports` volume below is mounted into the worker as well, so a generated file really
+      # is readable here. Nothing else in the fleet can assume that.
+      EXPORT_STORAGE_SHARED: 'true'
+    ports: ['3000:3000']
+    depends_on:
+      api: { condition: service_healthy }
+    volumes:
+      - exports:/var/magic/exports
+
+volumes:
+  pgdata:
+  redisdata:
+  exports:
