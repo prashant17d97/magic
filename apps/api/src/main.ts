@@ -2,8 +2,11 @@ import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
 import { randomUUID } from 'node:crypto';
+import { sql } from 'drizzle-orm';
+import type { Database } from '@magic/db';
 import { AppModule } from './app.module.js';
 import { loadConfig } from './config.js';
+import { DATABASE } from './platform/database.module.js';
 
 const config = loadConfig();
 
@@ -26,5 +29,15 @@ app.enableShutdownHooks();
 
 const adapter = app.getHttpAdapter().getInstance();
 adapter.get('/health', async () => ({ status: 'ok', service: 'api' }));
+
+const database = app.get<Database>(DATABASE);
+adapter.get('/health/ready', async (_request, reply) => {
+  try {
+    await database.execute(sql`SELECT 1`);
+    return { status: 'ready', service: 'api' };
+  } catch {
+    return reply.code(503).send({ status: 'unavailable', service: 'api' });
+  }
+});
 
 await app.listen({ port: config.API_PORT, host: config.API_HOST });
