@@ -43,7 +43,8 @@ try {
     ].join('\n'),
   );
 } catch (error) {
-  console.error('Seed failed:', error instanceof Error ? error.message : error);
+  console.error('Seed failed:', error);
+  if (error instanceof Error && error.cause) console.error('Caused by:', error.cause);
   process.exitCode = 1;
 } finally {
   await close();
