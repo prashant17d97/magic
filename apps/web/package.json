@@ -1,0 +1,42 @@
+{
+  "name": "@magic/web",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --port ${WEB_PORT:-3000}",
+    "build": "next build",
+    "start": "next start --port ${PORT:-3000}",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:e2e": "playwright test"
+  },
+  "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^7.1.0",
+    "@fortawesome/free-solid-svg-icons": "^7.1.0",
+    "@fortawesome/react-fontawesome": "^3.1.1",
+    "@magic/contracts": "workspace:*",
+    "@tanstack/react-query": "^5.102.8",
+    "ioredis": "^5.9.0",
+    "next": "16.3.3",
+    "nuqs": "^2.10.1",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "recharts": "^3.7.1",
+    "zod": "^4.5.4",
+    "zustand": "^5.0.15"
+  },
+  "devDependencies": {
+    "@magic/security": "workspace:*",
+    "@playwright/test": "^1.58.1",
+    "@tailwindcss/postcss": "^4.3.3",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.5",
+    "jsdom": "^28.0.2",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
+  }
+}

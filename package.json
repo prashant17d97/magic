@@ -1,14 +1,40 @@
 {
   "name": "magic",
   "version": "1.0.0",
-  "description": "",
-  "main": "dist/index.js",
+  "private": true,
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "scripts": {
-    "build": "tsc"
+    "build": "turbo run build",
+    "dev": "turbo run dev --parallel",
+    "lint": "eslint apps packages --max-warnings=0",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "test:coverage": "turbo run test:coverage",
+    "test:determinism": "pnpm --filter @magic/fixtures test:determinism",
+    "test:chaos": "pnpm --filter @magic/fixtures test:chaos",
+    "test:e2e": "pnpm --filter @magic/web test:e2e",
+    "db:up": "docker compose -f infra/docker-compose.dev.yml up -d",
+    "db:down": "docker compose -f infra/docker-compose.dev.yml down",
+    "db:migrate": "pnpm --filter @magic/db migrate",
+    "db:reset": "pnpm --filter @magic/db reset",
+    "fixtures:seed": "pnpm --filter @magic/fixtures seed",
+    "stripe:listen": "stripe listen --forward-to localhost:4001/wh/stripe/whk_dev_localdevelopmentkey01",
+    "docker:build": "docker compose -f infra/docker-compose.yml build",
+    "docker:up": "docker compose -f infra/docker-compose.yml up -d",
+    "format": "prettier --write \"**/*.{ts,tsx,css,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,css,md}\""
   },
-  "dependencies": {},
   "devDependencies": {
-    "typescript": "^5.5.3"
-  },
-  "private": true
+    "turbo": "^2.6.1",
+    "typescript": "^5.9.3",
+    "@types/node": "^22.19.0",
+    "eslint": "^9.39.1",
+    "typescript-eslint": "^8.47.0",
+    "prettier": "^3.6.2",
+    "@eslint/js": "^9.39.1",
+    "prettier-plugin-tailwindcss": "^0.7.1"
+  }
 }

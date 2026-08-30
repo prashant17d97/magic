@@ -1,0 +1,20 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "ui": "stream",
+  "globalDependencies": [".env"],
+  "globalEnv": [
+    "NODE_ENV", "DATABASE_URL", "DATABASE_URL_OWNER", "REDIS_URL",
+    "SESSION_SECRET", "SERVICE_TOKEN", "API_INTERNAL_URL",
+    "SECRETS_PROVIDER", "STRIPE_API_VERSION", "WORKER_ROLE",
+    "EXPORT_BUCKET", "EXPORT_URL_TTL_SECONDS", "OTEL_EXPORTER_OTLP_ENDPOINT",
+    "PORT", "NEXT_PUBLIC_APP_NAME"
+  ],
+  "tasks": {
+    "build": { "dependsOn": ["^build"], "outputs": ["dist/**", ".next/**", "!.next/cache/**"] },
+    "dev": { "cache": false, "persistent": true },
+    "lint": { "dependsOn": ["^build"] },
+    "typecheck": { "dependsOn": ["^build"] },
+    "test": { "dependsOn": ["^build"], "outputs": ["coverage/**"] },
+    "test:coverage": { "dependsOn": ["^build"], "outputs": ["coverage/**"] }
+  }
+}
