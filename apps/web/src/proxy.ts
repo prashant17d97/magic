@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
-const PUBLIC_PATHS = ['/sign-in', '/api/session'];
+const PUBLIC_PATHS = ['/sign-in', '/api/session', '/health'];
 
 /**
  * Next 16 renames middleware to `proxy`. Auth gating lives here, but it is never the only check:
