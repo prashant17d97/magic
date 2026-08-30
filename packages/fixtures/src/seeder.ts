@@ -111,16 +111,16 @@ export async function seedUsers(db: Database, tenantId: string, users: readonly 
 
       if (existing?.id) return existing.id;
 
-      const [created] = await tx
-        .insert(schema.users)
-        .values({
-          email: spec.email,
-          displayName: spec.displayName,
-          passwordHash: spec.passwordHash ?? (await hashPassword(SEED_PASSWORD)),
-        })
-        .returning({ id: schema.users.id });
+      const created = randomUUID();
 
-      return created?.id;
+      await tx.insert(schema.users).values({
+        id: created,
+        email: spec.email,
+        displayName: spec.displayName,
+        passwordHash: spec.passwordHash ?? (await hashPassword(SEED_PASSWORD)),
+      });
+
+      return created;
     });
 
     if (!userId) throw new Error(`Failed to create fixture user ${spec.email}.`);
