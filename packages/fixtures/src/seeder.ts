@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { and, eq } from 'drizzle-orm';
 import type { Database } from '@magic/db';
-import { schema, withTenant } from '@magic/db';
+import { schema, withTenant, withoutTenant } from '@magic/db';
 import { executeRun, recomputeSettlement, runMatching } from '@magic/recon';
 import { hashPassword } from '@magic/security';
 import { FIXTURE_NOW } from './clock.js';
@@ -101,29 +101,31 @@ export interface SeedUserSpec {
 }
 
 export async function seedUsers(db: Database, tenantId: string, users: readonly SeedUserSpec[]): Promise<void> {
-  await withTenant(db, { tenantId }, async (tx) => {
-    for (const spec of users) {
+  for (const spec of users) {
+    const userId = await withoutTenant(db, async (tx) => {
       const [existing] = await tx
         .select({ id: schema.users.id })
         .from(schema.users)
         .where(eq(schema.users.email, spec.email))
         .limit(1);
 
-      const userId =
-        existing?.id ??
-        (
-          await tx
-            .insert(schema.users)
-            .values({
-              email: spec.email,
-              displayName: spec.displayName,
-              passwordHash: spec.passwordHash ?? (await hashPassword(SEED_PASSWORD)),
-            })
-            .returning({ id: schema.users.id })
-        )[0]?.id;
+      if (existing?.id) return existing.id;
 
-      if (!userId) throw new Error(`Failed to create fixture user ${spec.email}.`);
+      const [created] = await tx
+        .insert(schema.users)
+        .values({
+          email: spec.email,
+          displayName: spec.displayName,
+          passwordHash: spec.passwordHash ?? (await hashPassword(SEED_PASSWORD)),
+        })
+        .returning({ id: schema.users.id });
 
+      return created?.id;
+    });
+
+    if (!userId) throw new Error(`Failed to create fixture user ${spec.email}.`);
+
+    await withTenant(db, { tenantId }, async (tx) => {
       await tx
         .insert(schema.memberships)
         .values({
@@ -133,8 +135,8 @@ export async function seedUsers(db: Database, tenantId: string, users: readonly 
           accountScope: spec.accountScope ?? null,
         })
         .onConflictDoNothing();
-    }
-  });
+    });
+  }
 }
 
 /**
